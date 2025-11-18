@@ -1,0 +1,945 @@
+PROTOTYPE LEARNING FOR SEQUENTIAL CLASSIFICATION  
+MEGA‑HANDBOOK FOR 5‑YEAR‑OLD GENIUSES (AND FUTURE‑YOU)
+
+=====================================================================
+0. HELLO LITTLE SCIENTIST 👋
+=====================================================================
+
+This is a VERY long storybook about your CS771 projects.
+
+It is written as if you are 5 years old, but actually it is for
+future‑you before interviews. We will:
+- Explain all the hard words with simple stories.
+- Explain WHY you chose each method.
+- Explain HOW the whole project flows, step by step.
+- Add many possible questions an interviewer might ask and how you
+  can answer in simple but smart language.
+
+There are TWO big adventures (assignments):
+1) EMOJI & SEQUENCE CLASSIFICATION (Assignment 1)
+2) LIFELONG IMAGE LEARNING (Assignment 2)
+
+You are the hero who builds smart robots that:
+- Read emojis and digits and say “YES” or “NO”.
+- Look at pictures again and again, from different worlds, and still
+  remember what they learned.
+
+Ready? Let’s go.
+
+=====================================================================
+1. SOME BIG WORDS, EXPLAINED LIKE STORIES
+=====================================================================
+
+Before we talk about your projects, we need to know some words.
+We will NOT use hard math. Just feelings and pictures in your head.
+
+---------------------------------------------------------------------
+1.1 What is DATA?
+---------------------------------------------------------------------
+
+Data is just “stuff we feed to the computer”.
+
+It can be:
+- Emojis 😀😢😡
+- Digits "012345"
+- Pictures (like cats, dogs, cars)
+
+Each piece of data is called an EXAMPLE.
+
+Often we also know the correct answer (called LABEL):
+- This emoji string → Class 0 (maybe “sad”)
+- This picture → label “dog”
+
+If we put many examples in a list or table, that is a DATASET.
+
+---------------------------------------------------------------------
+1.2 What is a FEATURE?
+---------------------------------------------------------------------
+
+Imagine you have many fruits.
+For each fruit, you can write:
+- color (red, yellow)
+- weight
+- sweetness
+
+Each of these (color, weight, sweetness) is a FEATURE.
+Together they describe the fruit.
+
+For your project:
+- An emoji sequence is turned into numbers → features.
+- A picture is turned into MobileNet features → features.
+- A 50‑digit string is turned into an integer sequence → features.
+
+The models do NOT see emojis or pixels directly; they only see
+FEATURES (numbers).
+
+---------------------------------------------------------------------
+1.3 What is a VECTOR?
+---------------------------------------------------------------------
+
+A VECTOR is just a list of numbers.
+Example: [1.0, 3.5, -2.1]
+
+You can imagine a vector as:
+- A little arrow in space.
+- The “feature list” for one example.
+
+Your project uses long vectors, like length 10,218.
+That’s just a very long list of numbers.
+
+---------------------------------------------------------------------
+1.4 What is a MODEL?
+---------------------------------------------------------------------
+
+A model is a smart calculator that takes a vector and gives an answer.
+
+Examples:
+- Logistic regression model
+- Decision tree
+- SVM
+- Neural network
+
+We show the model many examples with the right answer so it can learn
+its internal numbers.
+This is called TRAINING.
+
+---------------------------------------------------------------------
+1.5 What is TRAINING vs TESTING?
+---------------------------------------------------------------------
+
+TRAINING:
+- Show the model many examples + correct labels.
+- Model changes its inside numbers to make fewer mistakes.
+
+TESTING:
+- Show new examples WITHOUT telling the model the answer.
+- See how many it gets right.
+
+Accuracy = (correct answers) / (total test examples).
+
+---------------------------------------------------------------------
+1.6 What is a NEURAL NETWORK? And why "neural"?
+---------------------------------------------------------------------
+
+Your brain has tiny cells called NEURONS.
+Each neuron:
+- Receives signals.
+- Does a tiny calculation.
+- Sends signals on.
+
+A NEURAL NETWORK in the computer is a big set of FAKE neurons.
+Each fake neuron:
+- Takes some numbers.
+- Multiplies by weights.
+- Adds them up.
+- Passes through an activation function (like ReLU or sigmoid).
+
+Why the word "neural"?
+- Because it is INSPIRED by real neurons.
+- But it is MUCH simpler.
+- It is NOT a real brain. It’s just math.
+
+So if someone asks:
+- "Is it like nerves in the brain?"
+You can say:
+- "Kind of, but much simpler. It’s just many small math functions
+   connected together."
+
+---------------------------------------------------------------------
+1.7 What is an EMBEDDING?
+---------------------------------------------------------------------
+
+Imagine you have words or emojis.
+You can store each symbol by giving it a number.
+But we want more: we want the computer to know which symbols are
+similar.
+
+An EMBEDDING maps each symbol to a VECTOR of numbers.
+- 😀 → [0.2, -1.3, 0.7, ...]
+- 😢 → [0.1, -0.9, 0.5, ...]
+
+If two emojis appear in similar sentences or messages, their vectors
+become similar.
+
+So embedding is like:
+- Teaching the computer a secret code for each symbol.
+- The code is learned from data.
+
+In your project:
+- You use embeddings for emoji characters.
+- You use embeddings for digits in sequences.
+
+---------------------------------------------------------------------
+1.8 What is TF‑IDF? (Term Frequency–Inverse Document Frequency)
+---------------------------------------------------------------------
+
+This sounds scary, but let’s simplify.
+
+Imagine you have many SMS messages.
+Some words appear very often in every message, like "the".
+Some words appear rarely and are important, like "unicorn".
+
+TF‑IDF is a way to:
+- Give high scores to words that are important for a document.
+- Give low scores to words that appear everywhere (like "the").
+
+"TF" – term frequency:
+- How often a word appears in THIS message.
+
+"IDF" – inverse document frequency:
+- If a word appears in many messages, its IDF is low.
+- If it appears only in few messages, its IDF is high.
+
+So TF‑IDF score = TF × IDF.
+
+Result:
+- Words that are frequent in a document but rare in the whole set
+  get big scores.
+
+In your project:
+- You use TF‑IDF for the text sequence part (digits treated like
+  tokens) with Random Forest.
+- It didn’t work great (about 50% accuracy), because TF‑IDF doesn’t
+  capture long sequence order very well.
+
+---------------------------------------------------------------------
+1.9 What is a LOGISTIC REGRESSION model?
+---------------------------------------------------------------------
+
+Think of logistic regression as:
+- A straight line decision maker.
+
+It takes a features vector x and computes:
+- w • x + b (a weighted sum).
+Then passes through a logistic (sigmoid) function to get a probability
+between 0 and 1.
+
+If p > 0.5 → class 1, else class 0.
+
+It is simple and works well when the boundary between classes is
+roughly a straight line.
+
+---------------------------------------------------------------------
+1.10 What is a DECISION TREE?
+---------------------------------------------------------------------
+
+A decision tree asks questions step by step.
+
+Example for fruit:
+- Is weight > 100g?
+  - Yes → Is color red?
+    - Yes → apple
+    - No → maybe pear
+  - No → maybe grape
+
+In your data, it splits on features to separate classes.
+
+Good things:
+- Easy to understand.
+
+Bad things:
+- Can overfit (memorize training data).
+- For complex boundaries, it needs to be very deep.
+
+---------------------------------------------------------------------
+1.11 What is RANDOM FOREST?
+---------------------------------------------------------------------
+
+Random Forest = many decision trees together.
+- Each tree sees a slightly different sample of data.
+- They each vote on the answer.
+
+The forest usually performs better than a single tree and is more
+stable.
+
+---------------------------------------------------------------------
+1.12 What is KNN (K‑Nearest Neighbors)?
+---------------------------------------------------------------------
+
+KNN is a very lazy friend.
+
+To classify a new example:
+- Look at the K closest examples in the training set.
+- Let them vote for class.
+
+No training, just storing data.
+
+Problem:
+- Slow when there are many training examples.
+- Sensitive to feature scales.
+
+---------------------------------------------------------------------
+1.13 What is SVM (Support Vector Machine) & RBF kernel again?
+---------------------------------------------------------------------
+
+SVM:
+- Wants to find the best boundary between two classes.
+- Chooses a boundary that maximizes the margin (distance) between
+  closest points of each class.
+
+RBF kernel:
+- Maps data into an invisible high‑dimensional space where the
+  boundary can be a straight line, but when we map back, it looks
+  curvy and flexible.
+
+In your project, SVM with RBF works very well on high‑dimensional
+features.
+
+---------------------------------------------------------------------
+1.14 What is an RNN, LSTM, and GRU? (sequence models)
+---------------------------------------------------------------------
+
+When we process SEQUENCES (like sentences or digit strings), we need a
+model that can remember the past.
+
+RNN – Recurrent Neural Network
+------------------------------
+- Processes one element of the sequence at a time.
+- Has a hidden state that carries information forward.
+- Simple RNNs forget long‑term information easily.
+
+LSTM – Long Short‑Term Memory
+-----------------------------
+- A special RNN cell with gates.
+- Gates decide what to forget, what to keep, what to output.
+- Good at remembering longer sequences, but has many parameters.
+
+GRU – Gated Recurrent Unit
+--------------------------
+- A simpler cousin of LSTM.
+- Also has gates (update & reset) but fewer than LSTM.
+- Fewer parameters, faster training.
+- Still good at capturing long‑term patterns.
+
+In your project:
+- LSTM gave 70% accuracy on sequences.
+- CNN+LSTM gave 82% but with many parameters.
+- GRU gave 86% with fewer parameters.
+
+Why GRU?
+- Simpler (fewer parameters), easier to train.
+- Captured the sequence patterns best without being too heavy.
+
+---------------------------------------------------------------------
+1.15 What is a CNN (Convolutional Neural Network)?
+---------------------------------------------------------------------
+
+CNN is like a feature scanner on images.
+
+It uses small "windows" (kernels) that slide over the image and look
+for patterns:
+- Edges
+- Corners
+- Textures
+- Shapes
+
+These patterns are combined across layers to detect higher‑level
+concepts like eyes, faces, wheels, etc.
+
+In your projects:
+- CNN is used in the sequence part (1D CNN) to detect local patterns
+  in digit sequences.
+- MobileNet is a CNN used for images in Assignment 2.
+
+---------------------------------------------------------------------
+1.16 What is MobileNet and why MobileNet (not ResNet)?
+---------------------------------------------------------------------
+
+MobileNet and ResNet are both big CNN architectures.
+
+ResNet:
+- Very powerful, deeper, heavier.
+- Great accuracy but more parameters.
+
+MobileNet:
+- Designed to be light and fast.
+- Fewer parameters, good accuracy.
+- Works well on devices with less power (like phones).
+
+Why choose MobileNet in this project?
+- You need to extract features for MANY datasets (D1..D20).
+- Continual learning means repeated feature extraction.
+- MobileNet is fast and still gives good features.
+- ResNet would be slower and heavier.
+
+So when interviewer asks:
+- "Why MobileNet and not ResNet?"
+You say:
+- "MobileNet gives a good trade‑off between accuracy and speed. In a
+   lifelong learning setting, extracting features quickly for many
+   tasks is important. MobileNet is lighter, so it fits this setting
+   better than a heavy ResNet."
+
+---------------------------------------------------------------------
+1.17 What is PCA (Principal Component Analysis)?  (again, simpler)
+---------------------------------------------------------------------
+
+Imagine you have a very long list of numbers (features).
+Some combinations of numbers change a lot across examples.
+Some hardly change at all (noise).
+
+PCA finds directions (principal components) where the data changes the
+most.
+Then you can:
+- Project each vector onto the first K directions.
+
+This gives a shorter vector that keeps most of the important
+variations.
+
+In your project:
+- You reduce MobileNet features to e.g. 256 dimensions.
+- This makes storage and updates easier.
+
+---------------------------------------------------------------------
+1.18 What is a PROTOTYPE (again, deeper)?
+---------------------------------------------------------------------
+
+Prototype = typical example for a class.
+
+Imagine class "cat".
+We have many cat images.
+We pass them through MobileNet + PCA.
+We get many cat feature vectors.
+We might compute the average (mean vector).
+This average is the prototype for the "cat" class.
+
+When a new image comes:
+- Extract features.
+- Compare to cat prototype and dog prototype.
+- If closer to cat prototype, predict "cat".
+
+Prototype learning means:
+- We store and update these prototypes as we see new data.
+- They represent the internal distribution of each class.
+
+---------------------------------------------------------------------
+1.19 What is DOMAIN, DOMAIN SHIFT, and LIFELONG UDA?
+---------------------------------------------------------------------
+
+Domain:
+- A world where data comes from.
+  Example: CIFAR‑10 images with normal brightness.
+
+Domain shift:
+- New data looks different:
+  - Blurred
+  - Noisy
+  - Different camera, lighting, style
+
+If we train only on domain A and then test on domain B, the model may
+perform badly. We need to adapt.
+
+UDA – Unsupervised Domain Adaptation:
+- Adapting a model to a new domain WITHOUT labels.
+- You have source domain labeled data and target domain unlabeled
+  data.
+
+Lifelong UDA (LUDA):
+- Source and multiple target domains arriving over time.
+- Need to adapt to each new domain and still remember old ones.
+
+Your Assignment 2 uses ideas from a paper about LUDA called
+"Lifelong Domain Adaptation via Consolidated Internal Distribution"
+(LDA‑UCID).
+
+---------------------------------------------------------------------
+1.20 What is LDA‑UCID conceptually?
+---------------------------------------------------------------------
+
+LDA‑UCID is a method to:
+- Keep track of internal distributions (prototypes) for each class.
+- Update them carefully as new domains arrive.
+
+It does:
+- Consolidation: merges old knowledge and new information.
+- Domain adaptation: adjusts prototypes to new domain style.
+- Lifelong: repeats this many times for many domains.
+
+In simple terms:
+- It says, "We know what cats look like in old domains."
+- Then, "We see new cats that look a bit different."
+- It gently moves the cat prototype to fit both old and new cats.
+
+=====================================================================
+2. ASSIGNMENT 1 – EMOJI & SEQUENCE CLASSIFICATION (FULL FLOW)
+=====================================================================
+
+Now that we know the big words, let’s go step by step through
+Assignment 1.
+
+There are 3 main parts:
+1) Emoji feature dataset
+2) Deep feature dataset
+3) Text sequence dataset
+
+And then Task 2: combining them.
+
+---------------------------------------------------------------------
+2.1 PART 1 – EMOJI FEATURE DATASET
+---------------------------------------------------------------------
+
+### 2.1.1 Situation
+
+We have examples.
+Each example has:
+- 13 emojis in a row.
+- A label: class 0 or class 1.
+
+Goal: Build a classifier that says correct class as often as
+possible (binary classification).
+
+### 2.1.2 Turning emojis into numbers
+
+Steps:
+1) Split the 13‑emoji string into 13 characters.
+2) Map each emoji to an integer ID.
+3) Feed IDs into an embedding layer (dimension 32).
+
+So each example becomes a 13×32 matrix (13 tokens, each 32‑dim vector).
+
+### 2.1.3 Trying different models
+
+You tried:
+- Logistic Regression
+- Decision Tree
+- SVM
+- KNN
+- Dense Neural Network (DNN)
+
+The DNN had an embedding + one or more dense layers.
+
+### 2.1.4 Why DNN works best here
+
+- The relationship between emojis and labels is non‑linear.
+- DNN with embedding can learn rich patterns:
+  - For example, "if emoji A appears before emoji B, it means class 1"
+- Traditional models treat features more simply.
+
+Result:
+- DNN gave ~98.15% accuracy with ~7,297 parameters.
+
+Design reasoning:
+- Emoji data is not huge and not extremely high‑dimensional, so a
+  small DNN with learned embeddings is powerful but not too heavy.
+
+---------------------------------------------------------------------
+2.2 PART 2 – DEEP FEATURE DATASET
+---------------------------------------------------------------------
+
+### 2.2.1 Situation
+
+Now we don’t use raw emojis. Instead, we have DEEP FEATURES:
+- For each example: 13×786 matrix.
+- Each of the 13 positions had been processed by a deep network into
+  a 786‑dim vector.
+
+### 2.2.2 Preprocessing
+
+1) Flatten 13×786 → 10,218‑dim vector.
+2) Standardize each feature (mean 0, variance 1).
+
+### 2.2.3 Models tried and SVM winner
+
+Same family of models as before: logistic regression, trees, RF,
+KNN, SVM.
+
+Why SVM with RBF wins here:
+- Data is high‑dimensional.
+- Deep features are already rich and linearly almost separable.
+- SVM with RBF is excellent at finding complex boundaries in such
+  spaces.
+
+Result:
+- Accuracy ~98.77%.
+- Conceptual trainable parameters: 0 (we focus on support vectors).
+
+Design reasoning:
+- Since features are already deep and powerful, we don’t need another
+  deep network. A strong classical model like SVM is enough.
+
+---------------------------------------------------------------------
+2.3 PART 3 – TEXT SEQUENCE DATASET
+---------------------------------------------------------------------
+
+### 2.3.1 Situation
+
+Now each example is a string of 50 digits.
+Each digit encodes some property of an emoji.
+
+Goal: Binary classification again.
+
+### 2.3.2 Preprocessing
+
+1) Map each digit char to an integer.
+2) For neural models, use an embedding to turn each digit into a
+   vector.
+3) Sequence length is fixed (50).
+
+You tried multiple approaches.
+
+### 2.3.3 Approach: TF‑IDF + Random Forest
+
+Steps:
+- Treat the 50‑digit string like text.
+- Use TF‑IDF to get a vector representation.
+- Train Random Forest.
+
+Result:
+- Accuracy only ~50%.
+
+Why weak?
+- TF‑IDF ignores long‑range order beyond small n‑grams.
+- Random Forest is not specialized for sequential patterns.
+
+### 2.3.4 Approach: LSTM + embedding
+
+Steps:
+- Embedding layer for digits.
+- LSTM with 32 units.
+- Dense + sigmoid output.
+
+Result:
+- Accuracy ~70%.
+
+Why better?
+- LSTM remembers context over the sequence.
+- But maybe still underpowered or limited by hyperparameters.
+
+### 2.3.5 Approach: CNN + LSTM
+
+Steps:
+- Embedding.
+- 1D CNN with 16 filters, kernel size 3.
+- MaxPooling1D with pool size 2.
+- LSTM(32).
+- Dense + softmax output.
+
+Result:
+- Accuracy ~82%.
+- Parameters ~10,066.
+
+Why better?
+- CNN catches local patterns (like short motifs in digits).
+- LSTM reads those motifs in order.
+
+Why not final choice?
+- Model is heavier and more complex.
+
+### 2.3.6 Approach: GRU (final winner)
+
+Steps:
+- Embedding → GRU(16, return_sequences=True) → Dropout(0.4) →
+  GRU(32) → Dense + sigmoid.
+
+Result:
+- Accuracy ~86%.
+- Parameters ~6,045.
+
+Why GRU is best:
+- Simpler than LSTM.
+- Fewer parameters than CNN+LSTM.
+- Still strong at capturing sequence patterns.
+
+Design reasoning:
+- Sequence classification benefits from RNN‑type models.
+- We want a good trade‑off between accuracy and complexity.
+- GRU gave best performance with fewer parameters.
+
+---------------------------------------------------------------------
+2.4 TASK 2 – COMBINING ALL REPRESENTATIONS
+---------------------------------------------------------------------
+
+You then combine information from:
+- Emoji features.
+- Deep features.
+- Text sequences.
+
+You build a combined model using classical ML:
+- KNN, logistic regression, SVM (again best).
+
+Final winner: SVM with RBF
+- Accuracy ~98.8%.
+- Support vectors: ~1841.
+
+Why combination works:
+- Emoji features: shallow view.
+- Deep features: rich view.
+- Sequence features: order view.
+
+Together they give the SVM a more complete picture of each example.
+
+Design reasoning:
+- Combining modalities often improves performance because different
+  views capture different aspects of the underlying phenomenon.
+
+=====================================================================
+3. ASSIGNMENT 2 – LIFELONG LEARNING WITH CIFAR‑10 (FULL FLOW)
+=====================================================================
+
+Now we switch to images and continual learning.
+
+---------------------------------------------------------------------
+3.1 TASK 1 – D1 TO D10 (SIMILAR DISTRIBUTIONS)
+---------------------------------------------------------------------
+
+### 3.1.1 Situation
+
+We have 10 datasets:
+- D1, D2, ..., D10.
+Each Di is a subset of CIFAR‑10 images.
+They come from the SAME kind of world (same distribution).
+
+We want models F1..F10 such that:
+- Fi is trained after seeing D1..Di.
+- Fi does well on all D1..Di.
+
+This is like teaching a child math problems in grade 1, 2, 3...
+You don’t want them to forget grade 1 when they learn grade 2.
+
+### 3.1.2 Feature extraction with MobileNet
+
+Steps:
+1) Take each CIFAR‑10 image.
+2) Resize or adapt as needed for MobileNet.
+3) Pass through MobileNet.
+4) Take an intermediate feature vector.
+
+This gives you a high‑dimensional vector representing the image.
+
+Why not train big CNN from scratch?
+- Data for each Di might not be enough.
+- Training big CNN many times is expensive.
+- Using MobileNet as fixed feature extractor is efficient and works
+  well.
+
+### 3.1.3 Dimensionality reduction with PCA
+
+- MobileNet features are large.
+- You apply PCA to reduce to e.g. 256 dimensions.
+
+This speeds up:
+- Storage.
+- Prototype updates.
+- Classification.
+
+### 3.1.4 Learning with Prototype Classifier
+
+You use LWPC (Learning With Prototype Classifier):
+- Maintains prototypes for each class.
+- When new data comes, prototypes are updated.
+
+For Task 1, data is from similar distributions, so adaptation is
+simpler.
+
+### 3.1.5 Training flow for D1..D10
+
+For i = 1 to 10:
+1) For Di:
+   - Compute MobileNet features.
+   - Apply PCA.
+   - Update LWPC with Di’s data.
+2) Now we have model Fi.
+3) Evaluate Fi on D1..Di, build accuracy row i.
+
+In the end, we have an accuracy matrix with shape 10×10.
+This shows how each Fi performs on each dataset.
+
+If Fi does badly on earlier Dj (j < i), that’s forgetting.
+
+---------------------------------------------------------------------
+3.2 TASK 2 – D11 TO D20 (DIFFERENT DISTRIBUTIONS)
+---------------------------------------------------------------------
+
+### 3.2.1 Situation
+
+Now we have new datasets:
+- D11, D12, ..., D20.
+They come from DIFFERENT distributions.
+Maybe:
+- different brightness,
+- noise,
+- blur,
+- domain shifts.
+
+We want to train F11..F20 such that:
+- Fi (i ≥ 11) is good on D1..Di.
+- It adapts to new distributions.
+
+This is harder.
+
+### 3.2.2 Using LDA‑UCID ideas
+
+We still use:
+- MobileNet for features.
+- PCA for reduction.
+
+But the classifier now is:
+- LDA‑UCID classifier built on top of LWPC.
+
+Key additions:
+- LCUD method for prototype adaptation.
+- Regularization to prevent big changes.
+
+### 3.2.3 How LCUD adapts prototypes (simple picture)
+
+Imagine you have an old prototype for "cat": P_old.
+You see new cat images from a new domain and compute P_new.
+
+LCUD says:
+- P_adapted = alpha * P_new + (1 - alpha) * P_old.
+- If alpha is 0.5, you take average.
+
+This new P_adapted is between old and new prototypes.
+That means the classifier now recognizes cats in both domains.
+
+Regularization ensures we don’t move prototypes too fast, to avoid
+forgetting.
+
+### 3.2.4 Training flow for D11..D20
+
+We start from F10.
+For i = 11 to 20:
+1) For Di:
+   - Extract MobileNet features.
+   - Apply PCA.
+   - Compute new prototypes.
+   - Use pseudo‑labels if real labels are missing.
+   - Use LCUD to adapt prototypes with parameter alpha.
+2) Now we have Fi.
+3) Evaluate Fi on D1..Di.
+
+We get a bigger accuracy matrix (20×20 if we like) showing performance
+on all tasks over time.
+
+Design reasoning:
+- MobileNet + PCA ensures stable feature space.
+- Prototypes summarize class distributions.
+- LCUD blends old and new domain information.
+- This reduces catastrophic forgetting and handles domain shifts.
+
+=====================================================================
+4. STAR (SITUATION–TASK–ACTION–RESULT) STORIES
+=====================================================================
+
+You can use these to answer “Tell me about this project” questions.
+
+---------------------------------------------------------------------
+4.1 STAR FOR ASSIGNMENT 1
+---------------------------------------------------------------------
+
+S – Situation
+-------------
+I was given multiple datasets representing emoji messages and digit
+sequences. The task was binary classification (0/1), but the data was
+represented in different ways: shallow emoji features, deep neural
+features, and 50‑digit sequences.
+
+T – Task
+--------
+I had to build models that classify correctly, compare classical and
+deep learning approaches, and analyze which representations and models
+work best.
+
+A – Action
+----------
+- For emoji features:
+  - I used embeddings and tried traditional models and a dense neural
+    network. The DNN performed best.
+
+- For deep features:
+  - I flattened 13×786 matrices to vectors, standardized them, and
+    tried models like SVM. SVM with RBF kernel performed best.
+
+- For digit sequences:
+  - I tried TF‑IDF + Random Forest (weak), then sequence models like
+    LSTM, CNN+LSTM, and GRU with embeddings. GRU gave the best
+    accuracy with fewer parameters.
+
+- For task 2:
+  - I combined the representations and trained an SVM, which achieved
+    about 98.8% accuracy.
+
+R – Result
+----------
+I learned that:
+- Embeddings + DNNs are good for emoji‑like discrete inputs.
+- Deep precomputed features + SVM work great for high‑dimensional
+  representations.
+- GRU is a strong, efficient choice for sequence classification under
+  parameter constraints.
+- Combining multiple views of the data improves overall performance.
+
+---------------------------------------------------------------------
+4.2 STAR FOR ASSIGNMENT 2
+---------------------------------------------------------------------
+
+S – Situation
+-------------
+I had sequential CIFAR‑10 datasets D1..D10 and then D11..D20. The
+first set is from similar distributions; the second set involves
+significant distribution shifts. I had to train a sequence of models
+F1..F20 that maintain good performance across all datasets.
+
+T – Task
+--------
+Design a system that:
+- Uses a pre‑trained image backbone.
+- Adapts to new domains.
+- Avoids catastrophic forgetting.
+- Is inspired by the LDA‑UCID paper on lifelong domain adaptation.
+
+A – Action
+----------
+- I used MobileNet as a frozen feature extractor for CIFAR‑10 images.
+- I applied PCA for dimensionality reduction.
+- I used a prototype classifier (LWPC) to represent classes by their
+  internal distributions.
+- For D1..D10, I iteratively trained F1..F10 and measured an accuracy
+  matrix.
+- For D11..D20, I extended the classifier with LDA‑UCID ideas:
+  prototypes were adapted using LCUD (weighted blend of old and new
+  prototypes) with regularization strengths.
+- I used pseudo‑labels when real labels were not available to update
+  prototypes.
+
+R – Result
+----------
+The approach handled both similar and varying distributions, preserved
+performance on earlier datasets, and provided a practical
+implementation of lifelong domain adaptation using prototype learning
+and feature extraction.
+
+=====================================================================
+5. FINAL CHECKLIST FOR YOU
+=====================================================================
+
+Before an interview, make sure you can explain:
+
+ASSIGNMENT 1
+- What binary classification is.
+- Why embeddings are useful for emojis and digits.
+- Why DNN beats logistic regression for emoji features.
+- What deep features are and why SVM works well on them.
+- What TF‑IDF is and why it failed here.
+- What LSTM, CNN, and GRU are, and why GRU was chosen.
+- Why combined features + SVM give strong performance.
+
+ASSIGNMENT 2
+- What continual / lifelong learning is.
+- Why MobileNet was chosen over ResNet.
+- What PCA does.
+- What prototypes are and how they help.
+- What domain shift is.
+- What LDA‑UCID does conceptually (blending old and new prototypes).
+- How you trained F1..F20 and built the accuracy matrix.
+
+GENERAL
+- What a neural network is (simple explanation).
+- What SVM and RBF kernel do.
+- What CI and static analysis are (if they ask about your other
+  projects, like the C++ one).
+
+If you can walk through this handbook and tell the stories in your own
+words, you’ll be ready to explain your CS771 work to anyone—even if
+they are 5 years old or a very strict interviewer.
+
